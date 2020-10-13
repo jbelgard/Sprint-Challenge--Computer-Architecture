@@ -5,6 +5,8 @@ the past week and apply them in a concrete project.
 During this Sprint, you studied CPU components, number bases, bitwise
 operations, CPU stack, interrupts, and subroutines.
 
+asdfsdfasd
+
 In your challenge this week, you will demonstrate proficiency by adding _conditional jumps_ to your LS-8 emulator as well as answering a few questions during a one-on-one session with a PM.
 
 ## Instructions
