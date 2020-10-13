@@ -12,6 +12,15 @@ PUSH = 0b01000101
 POP = 0b01000110
 CALL = 0b01010000
 RET = 0b00010001 
+#sprint
+CMP = 0b10100111 
+JMP = 0b01010100 
+JEQ = 0b01010101
+JNE = 0b01010110
+#sprint - masks
+L_MASK = 0b00000100 
+G_MASK = 0b00000010 
+E_MASK = 0b00000001 
 
 class CPU:
     """Main CPU class."""
@@ -35,6 +44,13 @@ class CPU:
         self.branchtable[POP] = self.pop 
         self.branchtable[CALL] = self.call 
         self.branchtable[RET] = self.ret
+        #sprint
+        self.branchtable[CMP] = self.cmp 
+        self.branchtable[JMP] = self.jmp 
+        self.branchtable[JEQ] = self.jeq 
+        self.branchtable[JNE] = self.jne
+        #sprint - flag
+        self.fl = 0
 
     #access the RAM inside the CPU object MAR (Memory Address Register) - contains the address that is being read / written to
     def ram_read(self, MAR):
@@ -102,6 +118,15 @@ class CPU:
         #elif op == "SUB": etc
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
+        #sprint
+        elif op == "CMP":
+            self.fl = 0b00000000
+            if self.registers[reg_a] == self.registers[reg_b]:
+                self.fl = E_MASK
+            elif self.registers[reg_a] < self.registers[reg_b]:
+                self.fl = L_MASK
+            elif self.registers[reg_a] > self.registers[reg_b]:
+                self.fl = G_MASK
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -162,6 +187,33 @@ class CPU:
 
     def mul(self):
         self.op_helper("MUL")
+
+    #sprint
+    def cmp(self):
+        operand_a = self.ram[self.pc + 1]
+        operand_b = self.ram[self.pc + 2]
+        self.alu("CMP", operand_a, operand_b)
+        self.pc += 3
+
+    def jmp(self):
+        self.pc += 1
+        given_register = self.ram[self.pc]
+        self.pc = self.registers[given_register]
+
+    def jeq(self):
+        given_register = self.ram[self.pc + 1]
+        if self.fl == E_MASK:
+            self.pc = self.registers[given_register]
+        else:
+            self.pc += 2
+
+    def jne(self):
+        given_register = self.ram[self.pc + 1]
+        if self.fl != E_MASK:
+            self.pc = self.registers[given_register]
+        else:
+            self.pc += 2
+            
 
     def push(self):
         given_register = self.ram[self.pc + 1]
